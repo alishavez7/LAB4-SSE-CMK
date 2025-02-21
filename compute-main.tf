@@ -1,25 +1,4 @@
 
-# This Terraform configuration file creates a virtual machine in Azure with the following resources:
-# - azurerm_network_interface: Creates a network interface with a dynamic private IP address.
-# - azurerm_linux_virtual_machine: Creates a Linux virtual machine with specified configurations such as size, admin credentials, and OS disk settings.
-# - azurerm_availability_set: Creates an availability set to ensure high availability of the virtual machine.
-# - azurerm_disk_encryption_set: Creates a disk encryption set for encrypting the OS disk using a key from Azure Key Vault.
-
-# Local values:
-# - nic_name: The name of the network interface, derived from the virtual machine name.
-# - vm_name: The name of the virtual machine, derived from the application and environment names.
-
-# Variables:
-# - var.application_name: The name of the application.
-# - var.environment_name: The name of the environment (e.g., dev, prod).
-# - var.region: The Azure region where the resources will be created.
-
-# Resource details:
-# - azurerm_network_interface.nic: Configures the network interface with a dynamic private IP address.
-# - azurerm_linux_virtual_machine.vm: Configures the Linux virtual machine with Ubuntu 16.04-LTS, password authentication, and attaches the network interface.
-# - azurerm_availability_set.avset_name: Configures the availability set with 5 update domains and 3 fault domains.
-# - azurerm_disk_encryption_set.disk_encryption_set: Configures the disk encryption set with a system-assigned identity and a key from Azure Key Vault.
-#create virtual machine 
 
 locals {
   nic_name = "nic-${local.vm_name}"
@@ -94,6 +73,15 @@ resource "azurerm_virtual_machine_data_disk_attachment" "disk1_attach" {
   caching            = "None"
 }
 
+# This resource block defines an Azure Disk Encryption Set.
+# 
+# Arguments:
+# - name: The name of the Disk Encryption Set, which is a combination of the application name and environment name.
+# - resource_group_name: The name of the resource group where the Disk Encryption Set will be created.
+# - location: The Azure region where the Disk Encryption Set will be created.
+# - key_vault_key_id: The ID of the Key Vault key to be used for encryption.
+#
+# The identity block specifies that the Disk Encryption Set will use a system-assigned managed identity.
 resource "azurerm_disk_encryption_set" "disk_encryption_set" {
   name                = "des-${var.application_name}-${var.environment_name}"
   resource_group_name = azurerm_resource_group.rg.name
